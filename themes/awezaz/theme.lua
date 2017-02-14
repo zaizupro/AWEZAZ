@@ -1,6 +1,6 @@
 -------------------------------
 --  "awezaz" awesome theme  --
---  awsum version < 4.0.0   --
+--    awsum version 4.0.0   --
 --    By ZaiZu.             --
 -------------------------------
 
@@ -23,11 +23,12 @@ theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = "#FF8700"
 theme.fg_focus      = "#000000"
-theme.fg_urgent     = "#ffffff"
+theme.fg_urgent     = "#ff0000"
 theme.fg_minimize   = "#FBB362"
 
 theme.border_width  = "2"
-theme.border_normal = "#252218"
+--theme.border_normal = "#252218"
+theme.border_normal = "#754000"
 theme.border_focus  = "#FF8700"
 theme.border_marked = "#FBDE8E"
 
@@ -54,8 +55,8 @@ theme.fg_off_widget    = "#22211f"
 -- }}}
 
 -- {{{ Titlebars
-theme.titlebar_bg_focus  = "#3F3F3F"
-theme.titlebar_bg_normal = "#3F3F3F"
+theme.titlebar_bg_focus  = "#FF8700"
+theme.titlebar_bg_normal = "#754000"
 -- }}}
 
 -- There are other variable sets
@@ -64,7 +65,7 @@ theme.titlebar_bg_normal = "#3F3F3F"
 -- --[taglist|tasklist]_[bg|fg]_[focus|urgent]
 -- taglist_[bg|fg]_[focus|urgent|occupied|empty]
 -- tasklist_[bg|fg]_[focus|urgent]  
--- titlebar_[normal|focus]
+-- titlebar_[bg|fg]_[normal|focus]
 -- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
 -- mouse_finder_[color|timeout|animate_timeout|radius|factor]
 -- Example:
