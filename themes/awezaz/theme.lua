@@ -11,7 +11,7 @@ theme.wallpaper_cmd = { "awsetbg ./awezaz_ornj.png" }
 
 -- {{{ Styles
 --theme.font      = "terminus bold 13"
-theme.font      = "xos4 Terminus bold 14"
+theme.font      = "xos4 Terminus bold 14"   -- arch linux
 --theme.font      = "sans 14"
 
 
