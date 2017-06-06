@@ -41,10 +41,12 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(awful.util.get_themes_dir() .. "awezaz/theme.lua")
+-- beautiful.wallpaper = BGWLPPR
 
 -- This is used later as the default terminal and editor to run.
-terminal = "urxvt"
-editor = os.getenv("EDITOR") or "nano"
+terminal   = "urxvt"
+editor     = os.getenv("EDITOR") or "nano"
+browser    = "opera"
 editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
@@ -58,17 +60,17 @@ modkey = "Mod4"
 awful.layout.layouts = {
     awful.layout.suit.floating,
     awful.layout.suit.tile,
-    awful.layout.suit.tile.left,
+    -- awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
-    awful.layout.suit.tile.top,
+    -- awful.layout.suit.tile.top,
     awful.layout.suit.fair,
-    awful.layout.suit.fair.horizontal,
-    awful.layout.suit.spiral,
+    -- awful.layout.suit.fair.horizontal,
+    -- awful.layout.suit.spiral,
     awful.layout.suit.spiral.dwindle,
     awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
+    -- awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
-    awful.layout.suit.corner.nw,
+    -- awful.layout.suit.corner.nw,
     -- awful.layout.suit.corner.ne,
     -- awful.layout.suit.corner.sw,
     -- awful.layout.suit.corner.se,
@@ -91,17 +93,45 @@ end
 -- }}}
 
 -- {{{ Menu
--- Create a launcher widget and a main menu
-myawesomemenu = {
-   { "hotkeys", function() return false, hotkeys_popup.show_help end},
-   { "manual", terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", function() awesome.quit() end}
+
+office_menu = {
+  {" Word", "libreoffice --writer"},
+  {" Exel", "libreoffice --calc"}
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
+--awesome_menu = {
+--    { "RESTART", awesome.restart },
+--    { "QUIT AWSUM", function() awesome.quit() end}
+--}
+
+-- TODO: make confirm popup
+power_menu = {
+  {" REBOOT", "urxvt", beautiful.reboot_icon},
+  {" POWEROFF", "urxvt", beautiful.poweroff_icon}
+}
+
+-- menu template
+tmp_menu = {
+  {" Word", "urxvt"},
+  {" Exel", "urxvt"}
+}
+
+-- Create a launcher widget and a main menu
+myawesomemenu = {
+    { "hotkeys", function() return false, hotkeys_popup.show_help end},
+    { "manual", terminal .. " -e man awesome" },
+   --{ "edit config", editor_cmd .. " " .. awesome.conffile },
+    { "RESTART", awesome.restart },
+    { "QUIT AWSUM", function() awesome.quit() end}
+
+}
+
+mymainmenu = awful.menu({ items = { { "AWSUM", myawesomemenu, beautiful.awesome_icon },
+                                    { "TERM", terminal },
+                                    { "LibreOffice", office_menu},
+                                    { "-----"},
+                                    { "POWER", power_menu}
+
                                   }
                         })
 
@@ -200,6 +230,111 @@ awful.screen.connect_for_each_screen(function(s)
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
+---------------------------------------------------------------------------
+opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
+closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
+function embrace(str)
+    return ""..opening_brace..str..closing_brace..''
+end
+---------------------------------------------------------------------------
+one_sec_timer = timer{timeout = 1}
+ten_sec_timer = timer{timeout = 10}
+---------------------------------------------------------------------------
+function format_throughput(val)
+   if (val < 1000) then
+      return string.format('%3dKB/s', val)
+   elseif (val < 10240) then
+      return string.format('%.1fMB/s', val/1024)
+   else
+      return string.format('%3dMB/s', val/1024)
+   end
+end
+---------------------------------------------------------------------------
+
+function get_colorload(val)
+   local color = theme.level_fg_good  -- '#ffaa00' -- normal
+   if val > 85 then
+      color = theme.level_fg_critical  -- '#ff1100' -- 'red'
+   elseif val > 60 then
+      color = theme.level_fg_normal  -- '#ff5500' -- 'yellow'
+   end
+   return color
+end
+---------------------------------------------------------------------------
+
+function colorify(str, color)
+   return '<span foreground="'..color..'">'..str..'</span>'
+end
+---------------------------------------------------------------------------
+membox = wibox.widget.textbox()
+function memory()
+   local io_meminfo      = io.open("/proc/meminfo")
+   local str_meminfo     = io_meminfo:read("*a")
+   io.close(io_meminfo)
+
+   local total           = str_meminfo:match("MemTotal:%s+(%d+)")
+   local free            = str_meminfo:match("MemFree:%s+(%d+)")
+   local buffers         = str_meminfo:match("Buffers:%s+(%d+)")
+   local cached          = str_meminfo:match("Cached:%s+(%d+)")
+   local swap_total      = str_meminfo:match("SwapTotal:%s+(%d+)")
+   local swap_free       = str_meminfo:match("SwapFree:%s+(%d+)")
+   local swap_cached     = str_meminfo:match("SwapCached:%s+(%d+)")
+
+   local total_free      = free + buffers + cached
+   local total_swap_free = swap_free + swap_cached
+
+   local p_mem           = 100*(total - total_free)/total
+   local mem_color       = get_colorload(p_mem)
+   local sw_mem          = 100*(swap_total - total_swap_free)/swap_total
+   local sw_mem_color    = get_colorload(sw_mem)
+
+   local p_mem           = 100*(total - total_free)/total
+   local mem_color       = get_colorload(p_mem)
+   local sw_mem          = 100*(swap_total - total_swap_free)/swap_total
+   local sw_mem_color    = get_colorload(sw_mem)
+
+   membox:set_markup(embrace(
+                             colorify('RAM: ', theme.fg_normal)
+                             ..colorify(string.format('%.f%%', p_mem), mem_color)
+                             --..'('..colorify(string.format('%.fMb', (total - total_free)/1024), mem_color)
+                             --..colorify(string.format('/%.fMb', (total)/1024), 'orange')
+                             --..')'
+                            )..
+                     embrace(
+                             colorify('swap: ', theme.fg_normal)
+                             ..colorify(string.format('%.f%%', sw_mem), sw_mem_color)
+                             --..'('..colorify(string.format('%.fMb', (swap_total - total_swap_free)/1024), sw_mem_color)
+                             --..colorify(string.format('/%.fMb', (swap_total)/1024), 'white')
+                             --..')'
+                            )
+                     )
+end
+memory()
+one_sec_timer:connect_signal("timeout", memory)
+---------------------------------------------------------------------------
+
+-- Start timers to update widgets
+one_sec_timer:start()
+ten_sec_timer:start()
+---------------------------------------------------------------------------
+bottom_wibox = {}
+for scr = 1, screen.count() do
+    local l_layout = wibox.layout.fixed.horizontal()
+--    l_layout:add(membox)
+    l_layout:add(s.mytasklist)
+    bottom_wibox[scr] = awful.wibox({ position = "bottom" --, height = "25"
+         , screen = scr })
+
+    local lay = wibox.layout.align.horizontal()
+    lay:set_left(l_layout)
+    bottom_wibox[scr]:set_widget(lay)
+end
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+
+
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s })
 
@@ -211,8 +346,9 @@ awful.screen.connect_for_each_screen(function(s)
             mylauncher,
             s.mytaglist,
             s.mypromptbox,
+            membox
         },
-        s.mytasklist, -- Middle widget
+--        s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
@@ -242,6 +378,10 @@ globalkeys = awful.util.table.join(
               {description = "view next", group = "tag"}),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore,
               {description = "go back", group = "tag"}),
+
+
+    awful.key({ modkey            }, "L", function () awful.util.spawn('slimlock') end),
+
 
     awful.key({ modkey,           }, "j",
         function ()
@@ -510,6 +650,10 @@ client.connect_signal("request::titlebars", function(c)
 
     awful.titlebar(c) : setup {
         { -- Left
+--	     function (c)
+    	--     c.minimized = true
+--	     end ,
+
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,
             layout  = wibox.layout.fixed.horizontal
@@ -523,10 +667,11 @@ client.connect_signal("request::titlebars", function(c)
             layout  = wibox.layout.flex.horizontal
         },
         { -- Right
-            awful.titlebar.widget.floatingbutton (c),
+            --awful.titlebar.widget.floatingbutton (c),
+            awful.titlebar.widget.minimizebutton(c),
             awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.stickybutton   (c),
-            awful.titlebar.widget.ontopbutton    (c),
+            --awful.titlebar.widget.stickybutton   (c),
+            --awful.titlebar.widget.ontopbutton    (c),
             awful.titlebar.widget.closebutton    (c),
             layout = wibox.layout.fixed.horizontal()
         },
