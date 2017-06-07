@@ -212,7 +212,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ " *** ", " CODE ", " WEB ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 " }, s, awful.layout.layouts[2])
+    awful.tag({ " *** ", " *** ", " *** ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 " }, s, awful.layout.layouts[2])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -442,6 +442,8 @@ globalkeys = awful.util.table.join(
               {description = "select next", group = "layout"}),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
               {description = "select previous", group = "layout"}),
+
+    awful.key({         "Shift"   }, "Print", function () awful.util.spawn("bash -c 'import png:- | xclip -selection c -t image/png'") end),
 
     awful.key({ modkey, "Control" }, "n",
               function ()
