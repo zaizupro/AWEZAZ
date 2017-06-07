@@ -3,6 +3,8 @@
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
+-- local vicious = require("vicious")
+--awful.rules = require("awful.rules")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
@@ -12,6 +14,7 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
+--local dbus = require("dbus")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -230,16 +233,16 @@ awful.screen.connect_for_each_screen(function(s)
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
 closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
 function embrace(str)
     return ""..opening_brace..str..closing_brace..''
 end
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 one_sec_timer = timer{timeout = 1}
 ten_sec_timer = timer{timeout = 10}
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 function format_throughput(val)
    if (val < 1000) then
       return string.format('%3dKB/s', val)
@@ -249,7 +252,7 @@ function format_throughput(val)
       return string.format('%3dMB/s', val/1024)
    end
 end
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 function get_colorload(val)
    local color = theme.level_fg_good  -- '#ffaa00' -- normal
@@ -260,12 +263,12 @@ function get_colorload(val)
    end
    return color
 end
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 function colorify(str, color)
    return '<span foreground="'..color..'">'..str..'</span>'
 end
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 membox = wibox.widget.textbox()
 function memory()
    local io_meminfo      = io.open("/proc/meminfo")
@@ -309,14 +312,84 @@ function memory()
                             )
                      )
 end
+
+-------------------------------------------------------------------------------------
 memory()
 one_sec_timer:connect_signal("timeout", memory)
----------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------
+cpugraph = awful.widget.graph()
+cpugraph:set_width(75)
+cpugraph:set_height(25)
+cpugraph:set_background_color("#494B4F")
+--cpugraph:set_color("#FF5656")
+cpugraph:set_color({ type = "horisontal", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#FF5656" }, { 0.5, "#88A175" }, { 1, "#AECF96" } }})
+-- Register CPU widget
+-- vicious.register(cpugraph, vicious.widgets.cpu,
+--                     function (widget, args)
+--                         return args[1]
+--                     end)
+cpubox = wibox.widget.textbox()
+cpubox_img = wibox.widget.imagebox()
+cpu_arr = {}
+cpu0_arr = {}
+cpu1_arr = {}
+for i = 0, 4 do
+   cpu_arr[i] = 0
+   cpu0_arr[i] = 0
+   cpu1_arr[i] = 0
+end
+function parse_cpu(cpu, stat)
+   local cpu_new = {}
+   local ret = {}
+   cpu_new[0], cpu_new[1], cpu_new[2], cpu_new[3], cpu_new[4] = stat:match("cpu%d*%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)")
+
+   local idle   = (cpu_new[3] - cpu[3]) + (cpu_new[4] - cpu[4])
+   local user   = (cpu_new[1] - cpu[1]) + (cpu_new[0] - cpu[0])
+   local system = (cpu_new[2] - cpu[2])
+   local total  = idle + user + system
+   local busy   = user + system
+
+   ret['busy'] = busy*100/total
+   ret['sys'] = system*100/total
+   ret['user'] = user*100/total
+   ret['cpu'] = cpu_new
+
+   return ret
+end
+
+function cpu()
+   local io_stat  = io.open("/proc/stat")
+   local str_stat = io_stat:read("*l")
+   io.close(io_stat)
+
+   local ret = parse_cpu(cpu_arr, str_stat)
+   cpu_arr = ret['cpu']
+
+
+
+   cpubox:set_markup (embrace(colorify('cpu: ', 'orange')
+                       ..'('
+                       ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
+                       ..') | (u:'
+                       ..colorify(string.format('%.f%%', ret['user']), get_colorload(ret['user']))
+                       ..', s:'
+                       ..colorify(string.format('%.f%%', ret['sys']), get_colorload(ret['sys']))
+                       ..')'))
+end
+
+cpu()
+one_sec_timer:connect_signal("timeout", cpu)
+-------------------------------------------------------------------------------------
+
+
+
+
 
 -- Start timers to update widgets
 one_sec_timer:start()
 ten_sec_timer:start()
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 bottom_wibox = {}
 for scr = 1, screen.count() do
     local l_layout = wibox.layout.fixed.horizontal()
@@ -329,10 +402,10 @@ for scr = 1, screen.count() do
     lay:set_left(l_layout)
     bottom_wibox[scr]:set_widget(lay)
 end
----------------------------------------------------------------------------
----------------------------------------------------------------------------
----------------------------------------------------------------------------
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
     -- Create the wibox
@@ -346,7 +419,8 @@ end
             mylauncher,
             s.mytaglist,
             s.mypromptbox,
-            membox
+            membox,
+            cpubox
         },
 --        s.mytasklist, -- Middle widget
         { -- Right widgets
