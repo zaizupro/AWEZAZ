@@ -16,21 +16,26 @@ theme.font      = "xos4 Terminus bold 14"   -- arch linux
 
 
 -- {{{ Colors
-theme.bg_normal     = "#050608"
-theme.bg_focus      = "#FF8700"
-theme.bg_urgent     = "#FF7F27"
+theme.bg_normal     = "#000000"
+--theme.bg_focus      = "#FF8700"
+theme.bg_focus      = "#B58026"
+-- theme.bg_urgent     = "#FF7F27"
+theme.bg_urgent     = "#007Fff"
 theme.bg_minimize   = "#050608"
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = "#FF8700"
+-- theme.fg_normal     = "#FF8700"
+theme.fg_normal     = "#B58026"
 theme.fg_focus      = "#000000"
 theme.fg_urgent     = "#ff0000"
 theme.fg_minimize   = "#FBB362"
 
 theme.border_width  = "2"
 --theme.border_normal = "#252218"
-theme.border_normal = "#754000"
-theme.border_focus  = "#FF8700"
+--theme.border_normal = "#754000"
+theme.border_normal = "#5F5030"
+--theme.border_focus  = "#FF8700"
+theme.border_focus  = "#B58026"
 theme.border_marked = "#FBDE8E"
 
 theme.bg_widget        = "#333333"
@@ -61,8 +66,11 @@ theme.level_fg_critical     = "#FF1000"
 -- }}}
 
 -- {{{ Titlebars
-theme.titlebar_bg_focus  = "#FF8700"
-theme.titlebar_bg_normal = "#754000"
+-- theme.titlebar_bg_focus  = "#FF8700"
+-- theme.titlebar_bg_normal = "#754000"
+theme.titlebar_bg_focus  = "#B58026"
+theme.titlebar_bg_normal = "#5a4014"
+
 -- }}}
 
 -- There are other variable sets
@@ -98,9 +106,9 @@ theme.mouse_finder_color = "#CC9393"
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
-theme.menu_height = "18"
+theme.menu_height = "16"
 theme.menu_width  = "200"
-theme.menu_submenu_icon = "/usr/share/awesome/themes/default/submenu.png"
+theme.menu_submenu_icon = "/usr/share/awesome/themes/awezaz/submenu.png"
 -- }}}
 
 -- {{{ Icons
@@ -112,7 +120,6 @@ theme.taglist_squares_unsel = "/usr/share/awesome/themes/awezaz/taglist/squarez.
 
 -- {{{ Misc
 theme.awesome_icon           = "/usr/share/awesome/themes/awezaz/awesome-icon.png"
-theme.menu_submenu_icon      = "/usr/share/awesome/themes/default/submenu.png"
 theme.tasklist_floating_icon = "/usr/share/awesome/themes/default/tasklist/floatingw.png"
 -- }}}
 
