@@ -236,12 +236,16 @@ awful.screen.connect_for_each_screen(function(s)
 --------------------------------------------------------------------------------
 opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
 closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
+
+--------------------------------------------------------------------------------
 function embrace(str)
     return ""..opening_brace..str..closing_brace..''
 end
+
 --------------------------------------------------------------------------------
 one_sec_timer = timer{timeout = 1}
 ten_sec_timer = timer{timeout = 10}
+
 --------------------------------------------------------------------------------
 function format_throughput(val)
    if (val < 1000) then
@@ -249,11 +253,11 @@ function format_throughput(val)
    elseif (val < 10240) then
       return string.format('%.1fMB/s', val/1024)
    else
-      return string.format('%3dMB/s', val/1024)
+      return string.format('%.fMB/s', val/1024)
    end
 end
---------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
 function get_colorload(val)
    local color = theme.level_fg_good  -- '#ffaa00' -- normal
    if val > 85 then
@@ -302,22 +306,23 @@ function memory()
                              --..'('..colorify(string.format('%.fMb', (total - total_free)/1024), mem_color)
                              --..colorify(string.format('/%.fMb', (total)/1024), 'orange')
                              --..')'
-                            )..
-                     embrace(
-                             colorify('swap: ', theme.fg_normal)
-                             ..colorify(string.format('%.f%%', sw_mem), sw_mem_color)
-                             --..'('..colorify(string.format('%.fMb', (swap_total - total_swap_free)/1024), sw_mem_color)
-                             --..colorify(string.format('/%.fMb', (swap_total)/1024), 'white')
-                             --..')'
                             )
+                     -- ..
+                     -- embrace(
+                     --         colorify('swap: ', theme.fg_normal)
+                     --         ..colorify(string.format('%.f%%', sw_mem), sw_mem_color)
+                     --         --..'('..colorify(string.format('%.fMb', (swap_total - total_swap_free)/1024), sw_mem_color)
+                     --         --..colorify(string.format('/%.fMb', (swap_total)/1024), 'white')
+                     --         --..')'
+                     --        )
                      )
 end
 
--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 memory()
 one_sec_timer:connect_signal("timeout", memory)
 
--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 cpugraph = awful.widget.graph()
 cpugraph:set_width(75)
 cpugraph:set_height(25)
@@ -339,6 +344,8 @@ for i = 0, 4 do
    cpu0_arr[i] = 0
    cpu1_arr[i] = 0
 end
+
+--------------------------------------------------------------------------------
 function parse_cpu(cpu, stat)
    local cpu_new = {}
    local ret = {}
@@ -358,6 +365,7 @@ function parse_cpu(cpu, stat)
    return ret
 end
 
+--------------------------------------------------------------------------------
 function cpu()
    local io_stat  = io.open("/proc/stat")
    local str_stat = io_stat:read("*l")
@@ -366,21 +374,56 @@ function cpu()
    local ret = parse_cpu(cpu_arr, str_stat)
    cpu_arr = ret['cpu']
 
-
-
-   cpubox:set_markup (embrace(colorify('cpu: ', 'orange')
-                       ..'('
+   cpubox:set_markup (embrace(colorify('CPU: ', theme.fg_normal)
+                       -- ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
                        ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
-                       ..') | (u:'
-                       ..colorify(string.format('%.f%%', ret['user']), get_colorload(ret['user']))
-                       ..', s:'
-                       ..colorify(string.format('%.f%%', ret['sys']), get_colorload(ret['sys']))
-                       ..')'))
+                       -- ..') | (u:'
+                       -- ..colorify(string.format('%.f%%', ret['user']), get_colorload(ret['user']))
+                       -- ..', s:'
+                       -- ..colorify(string.format('%.f%%', ret['sys']), get_colorload(ret['sys']))
+                       -- ..')'
+                             )
+                     )
 end
 
 cpu()
 one_sec_timer:connect_signal("timeout", cpu)
--------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+hddbox = wibox.widget.textbox()
+hdd_r = 0
+hdd_w = 0
+hddlist = {'/sys/block/sda/stat', '/sys/block/sdb/stat'}
+
+function hdd()
+   local new_r = 0
+   local new_w = 0
+   for i = 1, 2 do
+      local io_stat = io.open(hddlist[i])
+      local str_stat = io_stat:read("*a")
+      io.close(io_stat)
+      local rd, wr = str_stat:match("%s+%d+%s+%d+%s+(%d+)%s+%d+%s+%d+%s+%d+%s+(%d+)")
+      new_w = new_w + wr
+      new_r = new_r + rd
+   end
+   local r = (new_r - hdd_r)/2
+   local w = (new_w - hdd_w)/2
+   hdd_w = new_w
+   hdd_r = new_r
+
+   hddbox:set_markup ( embrace(colorify('I/O: ', theme.fg_normal)
+                       ..'(r: '
+                       ..colorify(format_throughput(r), theme.level_fg_good)
+                       ..', w:'
+                       ..colorify(format_throughput(w), theme.level_fg_good)
+                       ..')'))
+end
+
+--------------------------------------------------------------------------------
+hdd()
+one_sec_timer:connect_signal("timeout", hdd)
+
+--------------------------------------------------------------------------------
 
 
 
@@ -420,7 +463,8 @@ end
             s.mytaglist,
             s.mypromptbox,
             membox,
-            cpubox
+            cpubox,
+            hddbox
         },
 --        s.mytasklist, -- Middle widget
         { -- Right widgets
