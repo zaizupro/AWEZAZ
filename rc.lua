@@ -147,11 +147,14 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
-mykeyboardlayout.widget.font = theme.font
+mykeyboardlayout.widget.font = theme.fontTTF
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+--mytextclock = wibox.widget.textclock()
+mytextclock = awful.widget.textclock( '<span color="#FF9500"> [%A ~ %d.%m.%Y] </span> [%H:%M:%S]', 5)
+mytextclock.font = theme.fontTTF
+
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = awful.util.table.join(
@@ -235,8 +238,13 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
 --------------------------------------------------------------------------------
-opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
-closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
+--opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
+opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="8x13bold">[</span>'
+--closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
+-- closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="8x13bold">] </span>'
+
+opening_brace = '['
+closing_brace = ']'
 
 --------------------------------------------------------------------------------
 function embrace(str)
@@ -275,6 +283,7 @@ function colorify(str, color)
 end
 --------------------------------------------------------------------------------
 membox = wibox.widget.textbox()
+membox.font = theme.fontTTF
 function memory()
    local io_meminfo      = io.open("/proc/meminfo")
    local str_meminfo     = io_meminfo:read("*a")
@@ -336,6 +345,8 @@ cpugraph:set_color({ type = "horisontal", from = { 0, 0 }, to = { 0, 20 }, stops
 --                         return args[1]
 --                     end)
 cpubox = wibox.widget.textbox()
+cpubox.font = theme.fontTTF
+
 cpubox_img = wibox.widget.imagebox()
 cpu_arr = {}
 cpu0_arr = {}
@@ -392,9 +403,11 @@ one_sec_timer:connect_signal("timeout", cpu)
 
 --------------------------------------------------------------------------------
 hddbox = wibox.widget.textbox()
+hddbox.font = theme.fontTTF
 hdd_r = 0
 hdd_w = 0
-hddlist = {'/sys/block/sda/stat', '/sys/block/sdb/stat'}
+--hddlist = {'/sys/block/sda/stat', '/sys/block/sdb/stat'}
+hddlist = {'/sys/block/sda/stat', '/sys/block/sda/stat'}
 
 function hdd()
    local new_r = 0
@@ -438,6 +451,7 @@ bottom_wibox = {}
 for scr = 1, screen.count() do
     local l_layout = wibox.layout.fixed.horizontal()
 --    l_layout:add(membox)
+    -- l_layout.width(10)
     l_layout:add(s.mytasklist)
     bottom_wibox[scr] = awful.wibox({ position = "bottom" --, height = "25"
          , screen = scr })
@@ -455,26 +469,31 @@ end
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s })
 
+
+
     -- Add widgets to the wibox
     s.mywibox:setup {
-        layout = wibox.layout.align.horizontal,
+        layout = wibox.layout.align.horizontal(),
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
             mylauncher,
             s.mytaglist,
             s.mypromptbox,
-            membox,
-            cpubox,
-            hddbox
         },
---        s.mytasklist, -- Middle widget
+        { -- Middle widgets
+            layout = wibox.layout.fixed.horizontal,
+       -- s.mytasklist
+        },
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            mykeyboardlayout,
             wibox.widget.systray(),
+            membox,
+            cpubox,
+            hddbox,
+            mykeyboardlayout,
             mytextclock,
             s.mylayoutbox,
-        },
+        }
     }
 end)
 -- }}}
