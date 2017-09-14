@@ -152,7 +152,7 @@ mykeyboardlayout.widget.font = theme.fontTTF
 -- {{{ Wibar
 -- Create a textclock widget
 --mytextclock = wibox.widget.textclock()
-mytextclock = awful.widget.textclock( '<span color="#FF9500"> [%A ~ %d.%m.%Y] </span> [%H:%M:%S]', 5)
+mytextclock = awful.widget.textclock( '<span color="#FF9500">[%A ~ %d.%m.%Y]</span> [%H:%M:%S]', 5)
 mytextclock.font = theme.fontTTF
 
 
@@ -219,7 +219,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ " *** ", " *** ", " *** ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 ", " 0 " }, s, awful.layout.layouts[2])
+    awful.tag({ " [1] ", " [2] ", " [3] ", " [4] ", " [5] ", " [6] ", " [7] ", " [8] ", " [9] " }, s, awful.layout.layouts[2])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -233,9 +233,11 @@ awful.screen.connect_for_each_screen(function(s)
                            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
     -- Create a taglist widget
     s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons)
+    s.mytaglist.font = theme.fontTTF
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
+    -- s.tasklist_font = theme.fontTTF
 
 --------------------------------------------------------------------------------
 --opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
@@ -748,7 +750,7 @@ awful.rules.rules = {
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = true }
+      }, properties = { titlebars_enabled = false }
     },
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
