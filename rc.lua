@@ -233,11 +233,9 @@ awful.screen.connect_for_each_screen(function(s)
                            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
     -- Create a taglist widget
     s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, taglist_buttons)
-    s.mytaglist.font = theme.fontTTF
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
-    -- s.tasklist_font = theme.fontTTF
 
 --------------------------------------------------------------------------------
 --opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
