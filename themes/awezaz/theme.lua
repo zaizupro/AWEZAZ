@@ -11,11 +11,11 @@ theme.wallpaper_cmd = { "awsetbg $HOME/.BGWALPPR" }
 -- }}}
 
 -- {{{ Styles
---theme.font      = "terminus bold 13"
 --theme.font      = "xos4 Terminus bold 14"   -- arch linux
---theme.font      = "sans 14"
-theme.font      = "8x13bold"
-theme.fontTTF      = "Misc Fixed"
+theme.font         = "8x13bold"
+theme.fontTTF      = "Misc Fixed Bold 14"
+theme.taglist_font = theme.fontTTF
+theme.tasklist_font = theme.fontTTF
 
 
 -- {{{ Colors
