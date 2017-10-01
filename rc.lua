@@ -489,7 +489,7 @@ end
             wibox.widget.systray(),
             membox,
             cpubox,
-            hddbox,
+            --hddbox,
             mykeyboardlayout,
             mytextclock,
             s.mylayoutbox,
@@ -622,6 +622,13 @@ clientkeys = awful.util.table.join(
         {description = "toggle fullscreen", group = "client"}),
     awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end,
               {description = "close", group = "client"}),
+    awful.key({   "Mod1"         }, "F4",      function (c) c:kill()                         end,
+              {description = "close", group = "client"}),
+
+       -- toggle titlebar
+    awful.key({ modkey, "Control" }, "t",   function (c) awful.titlebar.toggle(c)                    end,
+        {}),
+
     awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
               {description = "toggle floating", group = "client"}),
     awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end,
@@ -748,7 +755,7 @@ awful.rules.rules = {
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = false }
+      }, properties = { titlebars_enabled = true }
     },
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
@@ -793,7 +800,7 @@ client.connect_signal("request::titlebars", function(c)
 --	     function (c)
     	--     c.minimized = true
 --	     end ,
-
+        awful.titlebar.hide(c),
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,
             layout  = wibox.layout.fixed.horizontal
