@@ -31,7 +31,7 @@ theme.bg_systray    = theme.bg_normal
 theme.fg_normal     = "#B58026"
 theme.fg_focus      = "#000000"
 theme.fg_urgent     = "#ff0000"
-theme.fg_minimize   = "#FBB362"
+theme.fg_minimize   = "#CEBCA7"
 
 theme.border_width  = "2"
 --theme.border_normal = "#252218"
@@ -118,6 +118,7 @@ theme.menu_submenu_icon = "/usr/share/awesome/themes/awezaz/submenu.png"
 -- {{{ Taglist
 theme.taglist_squares_sel   = "/usr/share/awesome/themes/awezaz/taglist/squarefz.png"
 theme.taglist_squares_unsel = "/usr/share/awesome/themes/awezaz/taglist/squarez.png"
+theme.taglist_squares_resize   = true
 --theme.taglist_squares_resize = "false"
 -- }}}
 
