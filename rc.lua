@@ -601,7 +601,7 @@ globalkeys = awful.util.table.join(
               {description = "run prompt", group = "launcher"}),
 
     -- rofi Prompt
-    awful.key({ modkey            }, "e", function () awful.util.spawn("rofi -show run") end),
+    awful.key({ modkey            }, "e", function () awful.util.spawn("rofi -lines 10 -show run") end),
 
     awful.key({ modkey }, "x",
               function ()
