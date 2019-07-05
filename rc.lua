@@ -16,6 +16,8 @@ local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 --local dbus = require("dbus")
 
+awful.spawn.with_shell("~/.config/awesome/__autorun")
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -254,7 +256,9 @@ end
 
 --------------------------------------------------------------------------------
 one_sec_timer = timer{timeout = 1}
+five_sec_timer = timer{timeout = 5}
 ten_sec_timer = timer{timeout = 10}
+ten_min_timer = timer{timeout = 600}
 
 --------------------------------------------------------------------------------
 function format_throughput(val)
@@ -435,18 +439,97 @@ function hdd()
 end
 
 --------------------------------------------------------------------------------
-hdd()
-one_sec_timer:connect_signal("timeout", hdd)
+-- hdd()
+-- one_sec_timer:connect_signal("timeout", hdd)
 
 --------------------------------------------------------------------------------
+--                                                                            --
+updates_arch_box = wibox.widget.textbox()
+updates_arch_box.font = theme.fontTTF
+
+--                                                                            --
+function updates_arch()
+    awful.spawn.easy_async("updates_arch.sh", function(stdout, stderr, reason, exit_code)
+        updates_arch_box:set_text(stdout)
+    end)
+end
+
+--                                                                            --
+-- updates_arch()
+-- ten_min_timer:connect_signal("timeout", updates_arch)
+
+--------------------------------------------------------------------------------
+--                                                                            --
+loker_status_box = wibox.widget.textbox()
+loker_status_box.font = theme.fontTTF
+
+function loker_status()
+    status="undef"
+    out = assert(io.popen("chek_autolok", 'r'))
+    status = out:read("*all")
+    out:close()
+    if 'DISABLED' == status then
+        loker_status_box:set_markup('[ '..colorify(status, "#ff2200")..' ]')
+    end
+    if 'ENABLED' == status then
+        loker_status_box:set_markup('[ '..status..' ]')
+    end
 
 
 
+end
+
+--                                                                            --
+-- loker_status()
+-- ten_sec_timer:connect_signal("timeout", loker_status)
 
 
+--------------------------------------------------------------------------------
+--                                                                            --
+hand_made_time_date_box = wibox.widget.textbox()
+hand_made_time_date_box.font = theme.fontTTF
+
+--                                                                            --
+function hand_made_time_date()
+    time_date="undef"
+    out = assert(io.popen("echo -n $(date '+%A %F')", 'r'))
+    date = out:read("*all")
+    out = assert(io.popen("echo -n $(date '+%R:%S')", 'r'))
+    time = out:read("*all")
+    out:close()
+    time_date= date..' '..time
+    hand_made_time_date_box:set_markup('[ '..date..' '..
+                                        colorify(time , theme.fg_urgent)..' ]')
+end
+
+--                                                                            --
+
+cmnd=[[notify-send "$(cal -m)"]]
+cmnd2=[[notify-send "$(cal -m -3)"]]
+cmnd_=[[notify-send -t 0 "$(cal -m)"]]
+cmnd2_=[[notify-send -t 0 "$(cal -m -3)"]]
+hand_made_time_date_buttons = awful.util.table.join(
+    awful.button({ }, 1, function () awful.spawn.with_shell(cmnd) end),
+    awful.button({ "Control" }, 1, function () awful.spawn.with_shell(cmnd_) end),
+    awful.button({ }, 3, function () awful.spawn.with_shell(cmnd2) end),
+    awful.button({ "Control" }, 3, function () awful.spawn.with_shell(cmnd2_) end)
+    )
+
+hand_made_time_date_box:buttons(hand_made_time_date_buttons)
+
+--                                                                            --
+hand_made_time_date()
+five_sec_timer:connect_signal("timeout", hand_made_time_date)
+
+
+--------------------------------------------------------------------------------
+--                                                                            --
 -- Start timers to update widgets
 one_sec_timer:start()
+five_sec_timer:start()
 ten_sec_timer:start()
+ten_min_timer:start()
+
 --------------------------------------------------------------------------------
 bottom_wibox = {}
 for scr = 1, screen.count() do
@@ -492,7 +575,8 @@ end
             cpubox,
             --hddbox,
             mykeyboardlayout,
-            mytextclock,
+            hand_made_time_date_box,
+            -- mytextclock,
             s.mylayoutbox,
         }
     }
@@ -519,7 +603,7 @@ globalkeys = awful.util.table.join(
               {description = "go back", group = "tag"}),
 
 
-    awful.key({ modkey            }, "L", function () awful.util.spawn('slimlock') end),
+--    awful.key({ modkey            }, "L", function () awful.util.spawn('slimlock') end),
 
 
     awful.key({ modkey,           }, "j",
@@ -582,8 +666,8 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
               {description = "select previous", group = "layout"}),
 
-    awful.key({         "Shift"   }, "Print", function () awful.util.spawn("bash -c 'import png:- | xclip -selection c -t image/png'") end),
-    awful.key({ modkey            }, "l", function () awful.util.spawn("bash -c 'slock'") end),
+--    awful.key({         "Shift"   }, "Print", function () awful.util.spawn("bash -c 'import png:- | xclip -selection c -t image/png'") end),
+--    awful.key({ modkey            }, "l", function () awful.util.spawn("bash -c 'slock'") end),
 
     awful.key({ modkey, "Control" }, "n",
               function ()
@@ -603,7 +687,7 @@ globalkeys = awful.util.table.join(
               {description = "run prompt", group = "launcher"}),
 
     -- rofi Prompt
-    awful.key({ modkey            }, "e", function () awful.util.spawn("rofi -lines 10 -show run") end),
+--    awful.key({ modkey            }, "e", function () awful.util.spawn("rofi -show run -disable-history") end),
 
     awful.key({ modkey }, "x",
               function ()
@@ -634,7 +718,7 @@ clientkeys = awful.util.table.join(
 
        -- toggle titlebar
     awful.key({ modkey, "Control" }, "t",   function (c) awful.titlebar.toggle(c)                    end,
-        {}),
+              {description = "toggle titlebar", group = "client"}),
 
     awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
               {description = "toggle floating", group = "client"}),
