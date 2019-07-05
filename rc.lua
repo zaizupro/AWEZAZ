@@ -16,7 +16,7 @@ local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 --local dbus = require("dbus")
 
-awful.spawn.with_shell("~/.config/awesome/__autorun")
+require("awful").spawn.with_shell("~/.config/awesome/autorun")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
