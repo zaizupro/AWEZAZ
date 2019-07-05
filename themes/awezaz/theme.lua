@@ -1,44 +1,51 @@
--------------------------------
---  "awezaz" awesome theme  --
---    awsum version 4.0.0   --
---    By ZaiZu.             --
--------------------------------
+--------------------------------------------------------------------------------
+--                                                                            --
+--                      "awezaz" awesome theme                                --
+--                        awsum version 4.0.0                                 --
+--                        By ZaiZu.                                           --
+--                                                                            --
+--------------------------------------------------------------------------------
+
 
 -- {{{ Main
 theme = {}
---theme.wallpaper_cmd = { "awsetbg ./awezaz_ornj.png" }
 theme.wallpaper_cmd = { "awsetbg $HOME/.BGWALPPR" }
 -- }}}
 
 -- {{{ Styles
---theme.font      = "xos4 Terminus bold 14"   -- arch linux
 theme.font         = "8x13bold"
 theme.fontTTF      = "Misc Fixed Bold 14"
+
+-- theme.font         = "xos4 Terminus bold 14"   -- arch linux
+-- theme.fontTTF      = "xos4 Terminus bold 14"
+
 theme.taglist_font = theme.fontTTF
 theme.tasklist_font = theme.fontTTF
 
+theme.fg0 = "#F7D8A4"
+theme.fg1 = "#DBBF91"
+theme.fg2 = "#99825C"
+theme.bg0 = "#212017"
+theme.bg1 = "#3D1800"
+theme.bg2 = "#5F5030"
+
 
 -- {{{ Colors
-theme.bg_normal     = "#000000"
---theme.bg_focus      = "#FF8700"
-theme.bg_focus      = "#B58026"
--- theme.bg_urgent     = "#FF7F27"
-theme.bg_urgent     = "#007Fff"
+theme.bg_normal     = theme.bg0
+theme.fg_normal     = theme.fg1
+
+theme.bg_focus      = theme.fg_normal
+theme.bg_urgent     = theme.bg1
 theme.bg_minimize   = "#050608"
 theme.bg_systray    = theme.bg_normal
 
--- theme.fg_normal     = "#FF8700"
-theme.fg_normal     = "#B58026"
-theme.fg_focus      = "#000000"
-theme.fg_urgent     = "#ff0000"
+theme.fg_focus      = theme.bg_normal
+theme.fg_urgent     = "#ff9500"
 theme.fg_minimize   = "#CEBCA7"
 
 theme.border_width  = "2"
---theme.border_normal = "#252218"
---theme.border_normal = "#754000"
-theme.border_normal = "#5F5030"
---theme.border_focus  = "#FF8700"
-theme.border_focus  = "#B58026"
+theme.border_normal = theme.bg2
+theme.border_focus  = theme.fg2
 theme.border_marked = "#FBDE8E"
 
 theme.bg_widget        = "#333333"
@@ -50,6 +57,13 @@ theme.fg_off_widget    = "#22211f"
 theme.level_fg_good     = "#FFaa00"
 theme.level_fg_normal     = "#FF5000"
 theme.level_fg_critical     = "#FF1000"
+
+theme.hotkeys_fg     = theme.fg_normal
+theme.hotkeys_bg     = theme.bg_normal
+theme.hotkeys_modifiers_fg = theme.fg0
+theme.hotkeys_font = theme.font
+theme.hotkeys_description_font = theme.font
+theme.description_font = theme.font
 
 
 -- {{{ Colors
@@ -69,11 +83,8 @@ theme.level_fg_critical     = "#FF1000"
 -- }}}
 
 -- {{{ Titlebars
--- theme.titlebar_bg_focus  = "#FF8700"
--- theme.titlebar_bg_normal = "#754000"
-theme.titlebar_bg_focus  = "#B58026"
-theme.titlebar_bg_normal = "#5a4014"
-
+theme.titlebar_bg_focus  = theme.fg_normal
+theme.titlebar_bg_normal = theme.border_normal
 -- }}}
 
 -- There are other variable sets
