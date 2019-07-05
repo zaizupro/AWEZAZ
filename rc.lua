@@ -51,7 +51,7 @@ beautiful.init(awful.util.get_themes_dir() .. "awezaz/theme.lua")
 -- This is used later as the default terminal and editor to run.
 terminal   = "urxvt"
 editor     = os.getenv("EDITOR") or "nano"
-browser    = "opera"
+browser    = "firefox"
 editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
@@ -847,6 +847,8 @@ awful.rules.rules = {
           "copyq",  -- Includes session name in class.
         },
         class = {
+          "*",
+          "URxvt",
           "Arandr",
           "Gpick",
           "Kruler",
@@ -864,7 +866,9 @@ awful.rules.rules = {
           "AlarmWindow",  -- Thunderbird's calendar.
           "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
         }
-      }, properties = { floating = true }},
+      }, properties = { floating = true },
+         callback = function (c) awful.placement.centered(c,nil) end
+},
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
