@@ -503,7 +503,6 @@ function hand_made_time_date()
 end
 
 --                                                                            --
-
 cmnd=[[notify-send "$(cal -m)"]]
 cmnd2=[[notify-send "$(cal -m -3)"]]
 cmnd_=[[notify-send -t 0 "$(cal -m)"]]
@@ -516,6 +515,29 @@ hand_made_time_date_buttons = awful.util.table.join(
     )
 
 hand_made_time_date_box:buttons(hand_made_time_date_buttons)
+
+--                                                                            --
+function hmtd_popup(timeout)
+    local out = assert(io.popen("cal -m", 'r'))
+    local info = out:read("*all")
+    out:close()
+
+    hmtd_popup_ = naughty.notify({
+        text = info,
+        timeout = timeout,
+        hover_timeout = 0.5,
+        screen = awful.screen.focused()
+      })
+end
+
+--                                                                            --
+function hmtd_over_add_to_widget(widget)
+   widget:connect_signal(
+      'mouse::enter', function () hmtd_popup(0) end)
+   widget:connect_signal(
+      'mouse::leave', function () naughty.destroy(hmtd_popup_) end)
+end
+hmtd_over_add_to_widget(hand_made_time_date_box)
 
 --                                                                            --
 hand_made_time_date()
