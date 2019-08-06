@@ -19,6 +19,10 @@ theme.fontTTF      = "Misc Fixed Bold 14"
 -- theme.font         = "xos4 Terminus bold 14"   -- arch linux
 -- theme.fontTTF      = "xos4 Terminus bold 14"
 
+-- theme.font        = "Anonymous Pro bold 14"
+-- theme.fontTTF        = "Anonymous Pro bold 14"
+
+
 theme.taglist_font = theme.fontTTF
 theme.tasklist_font = theme.fontTTF
 
