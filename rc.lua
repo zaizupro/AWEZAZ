@@ -6,10 +6,17 @@ local awful = require("awful")
 -- local vicious = require("vicious")
 --awful.rules = require("awful.rules")
 require("awful.autofocus")
+
 -- Widget and layout library
 local wibox = require("wibox")
+
 -- Theme handling library
 local beautiful = require("beautiful")
+
+-- Themes define colours, icons, font and wallpapers.
+beautiful.init(awful.util.get_themes_dir() .. "awezaz/theme.lua")
+-- beautiful.wallpaper = BGWLPPR
+
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -17,7 +24,14 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 --local dbus = require("dbus")
 
 --local volumearc = require("volumearc")
+require("utils")
+require("cmus")
+require("updates_arch")
+require("loker_status")
+require("hand_made_time_date")
+require("net_status")
 
+-- Autorun
 require("awful").spawn.with_shell("~/.config/awesome/autorun")
 
 -- {{{ Error handling
@@ -46,9 +60,6 @@ end
 -- }}}
 
 -- {{{ Variable definitions
--- Themes define colours, icons, font and wallpapers.
-beautiful.init(awful.util.get_themes_dir() .. "awezaz/theme.lua")
--- beautiful.wallpaper = BGWLPPR
 
 -- This is used later as the default terminal and editor to run.
 terminal   = "urxvt"
@@ -154,11 +165,6 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 mykeyboardlayout.widget.font = theme.fontTTF
 
 -- {{{ Wibar
--- Create a textclock widget
---mytextclock = wibox.widget.textclock()
-mytextclock = awful.widget.textclock( '<span color="#FF9500">[%A ~ %d.%m.%Y]</span> [%H:%M:%S]', 5)
-mytextclock.font = theme.fontTTF
-
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = awful.util.table.join(
@@ -243,52 +249,7 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
 --------------------------------------------------------------------------------
---opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">[</span>'
-opening_brace = '<span foreground="'..theme.fg_normal..'" font_desc="8x13bold">[</span>'
---closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="Ubuntu">] </span>'
--- closing_brace = '<span foreground="'..theme.fg_normal..'" font_desc="8x13bold">] </span>'
-
-opening_brace = '['
-closing_brace = ']'
-
---------------------------------------------------------------------------------
-function embrace(str)
-    return ""..opening_brace..str..closing_brace..''
-end
-
---------------------------------------------------------------------------------
-one_sec_timer = timer{timeout = 1}
-five_sec_timer = timer{timeout = 5}
-ten_sec_timer = timer{timeout = 10}
-ten_min_timer = timer{timeout = 600}
-
---------------------------------------------------------------------------------
-function format_throughput(val)
-   if (val < 1000) then
-      return string.format('%3dKB/s', val)
-   elseif (val < 10240) then
-      return string.format('%.1fMB/s', val/1024)
-   else
-      return string.format('%.fMB/s', val/1024)
-   end
-end
-
---------------------------------------------------------------------------------
-function get_colorload(val)
-   local color = theme.level_fg_good  -- '#ffaa00' -- normal
-   if val > 85 then
-      color = theme.level_fg_critical  -- '#ff1100' -- 'red'
-   elseif val > 60 then
-      color = theme.level_fg_normal  -- '#ff5500' -- 'yellow'
-   end
-   return color
-end
---------------------------------------------------------------------------------
-
-function colorify(str, color)
-   return '<span foreground="'..color..'">'..str..'</span>'
-end
---------------------------------------------------------------------------------
+-- TODO reimpl in bash
 membox = wibox.widget.textbox()
 membox.font = theme.fontTTF
 function memory()
@@ -320,18 +281,7 @@ function memory()
    membox:set_markup(embrace(
                              colorify('RAM: ', theme.fg_normal)
                              ..colorify(string.format('%.f%%', p_mem), mem_color)
-                             --..'('..colorify(string.format('%.fMb', (total - total_free)/1024), mem_color)
-                             --..colorify(string.format('/%.fMb', (total)/1024), 'orange')
-                             --..')'
                             )
-                     -- ..
-                     -- embrace(
-                     --         colorify('swap: ', theme.fg_normal)
-                     --         ..colorify(string.format('%.f%%', sw_mem), sw_mem_color)
-                     --         --..'('..colorify(string.format('%.fMb', (swap_total - total_swap_free)/1024), sw_mem_color)
-                     --         --..colorify(string.format('/%.fMb', (swap_total)/1024), 'white')
-                     --         --..')'
-                     --        )
                      )
 end
 
@@ -394,7 +344,6 @@ function cpu()
    cpu_arr = ret['cpu']
 
    cpubox:set_markup (embrace(colorify('CPU: ', theme.fg_normal)
-                       -- ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
                        ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
                        -- ..') | (u:'
                        -- ..colorify(string.format('%.f%%', ret['user']), get_colorload(ret['user']))
@@ -445,116 +394,6 @@ end
 -- one_sec_timer:connect_signal("timeout", hdd)
 
 --------------------------------------------------------------------------------
---                                                                            --
-updates_arch_box = wibox.widget.textbox()
-updates_arch_box.font = theme.fontTTF
-
---                                                                            --
-function updates_arch()
-    awful.spawn.easy_async("updates_arch.sh", function(stdout, stderr, reason, exit_code)
-        updates_arch_box:set_text(stdout)
-    end)
-end
-
---                                                                            --
--- updates_arch()
--- ten_min_timer:connect_signal("timeout", updates_arch)
-
---------------------------------------------------------------------------------
---                                                                            --
-loker_status_box = wibox.widget.textbox()
-loker_status_box.font = theme.fontTTF
-
-function loker_status()
-    status="undef"
-    out = assert(io.popen("chek_autolok", 'r'))
-    status = out:read("*all")
-    out:close()
-    if 'DISABLED' == status then
-        loker_status_box:set_markup('[ '..colorify(status, "#ff2200")..' ]')
-    end
-    if 'ENABLED' == status then
-        loker_status_box:set_markup('[ '..status..' ]')
-    end
-
-
-
-end
-
---                                                                            --
--- loker_status()
--- ten_sec_timer:connect_signal("timeout", loker_status)
-
-
---------------------------------------------------------------------------------
---                                                                            --
-hand_made_time_date_box = wibox.widget.textbox()
-hand_made_time_date_box.font = theme.fontTTF
-
---                                                                            --
-function hand_made_time_date()
-    time_date="undef"
-    out = assert(io.popen("echo -n $(date '+%A %F')", 'r'))
-    date = out:read("*all")
-    out = assert(io.popen("echo -n $(date '+%R:%S')", 'r'))
-    time = out:read("*all")
-    out:close()
-    time_date= date..' '..time
-    hand_made_time_date_box:set_markup('[ '..date..' '..
-                                        colorify(time , theme.fg_urgent)..' ]')
-end
-
---                                                                            --
-cmnd=[[notify-send "$(cal -m)"]]
-cmnd2=[[notify-send "$(cal -m -3)"]]
-cmnd_=[[notify-send -t 0 "$(cal -m)"]]
-cmnd2_=[[notify-send -t 0 "$(cal -m -3)"]]
-hand_made_time_date_buttons = awful.util.table.join(
-    awful.button({ }, 1, function () awful.spawn.with_shell(cmnd) end),
-    awful.button({ "Control" }, 1, function () awful.spawn.with_shell(cmnd_) end),
-    awful.button({ }, 3, function () awful.spawn.with_shell(cmnd2) end),
-    awful.button({ "Control" }, 3, function () awful.spawn.with_shell(cmnd2_) end)
-    )
-
-hand_made_time_date_box:buttons(hand_made_time_date_buttons)
-
---                                                                            --
-function hmtd_popup(timeout)
-    local out = assert(io.popen("cal -m", 'r'))
-    local info = out:read("*all")
-    out:close()
-
-    hmtd_popup_ = naughty.notify({
-        text = info,
-        timeout = timeout,
-        hover_timeout = 0.5,
-        screen = awful.screen.focused()
-      })
-end
-
---                                                                            --
-function hmtd_over_add_to_widget(widget)
-   widget:connect_signal(
-      'mouse::enter', function () hmtd_popup(0) end)
-   widget:connect_signal(
-      'mouse::leave', function () naughty.destroy(hmtd_popup_) end)
-end
-hmtd_over_add_to_widget(hand_made_time_date_box)
-
---                                                                            --
-hand_made_time_date()
-five_sec_timer:connect_signal("timeout", hand_made_time_date)
-
-
---------------------------------------------------------------------------------
---                                                                            --
--- Start timers to update widgets
-one_sec_timer:start()
-five_sec_timer:start()
-ten_sec_timer:start()
-ten_min_timer:start()
-
---------------------------------------------------------------------------------
 bottom_wibox = {}
 for scr = 1, screen.count() do
     local l_layout = wibox.layout.fixed.horizontal()
@@ -568,23 +407,17 @@ for scr = 1, screen.count() do
     lay:set_left(l_layout)
     bottom_wibox[scr]:set_widget(lay)
 end
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 
-
+--------------------------------------------------------------------------------
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s })
-
-
 
     -- Add widgets to the wibox
     s.mywibox:setup {
         layout = wibox.layout.align.horizontal(),
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            mylauncher,
+            -- mylauncher,
             s.mytaglist,
             s.mypromptbox,
         },
@@ -597,10 +430,14 @@ end
             wibox.widget.systray(),
             membox,
             cpubox,
+            tb_cmus,
             --hddbox,
+            net_status,
+            updates_arch_box,
+            loker_status_box,
             mykeyboardlayout,
+            --volumearc,
             hand_made_time_date_box,
-            -- mytextclock,
             s.mylayoutbox,
         }
     }
@@ -619,6 +456,24 @@ root.buttons(awful.util.table.join(
 globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
+
+
+    awful.key({ modkey,  "Shift"  }, "w",
+              function ()
+                  if client.focus then
+                      local current_tag = client.focus.first_tag
+                      local next_tag = client.focus.screen.tags[current_tag.index + 1]
+                      if next_tag then
+                          client.focus:move_to_tag(next_tag)
+                          naughty.notify({text="moved to " .. next_tag.index })
+              --            awful.tag.viewnext
+                      end
+                 end
+              end,
+              {description = "move focused client to next tag ", group = "tag"}),
+
+
+
     awful.key({ modkey,           }, "1",   awful.tag.viewprev,
               {description = "view previous", group = "tag"}),
     awful.key({ modkey,           }, "2",  awful.tag.viewnext,
@@ -670,21 +525,9 @@ globalkeys = awful.util.table.join(
               {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
-    awful.key({ modkey, "Shift"   }, "q", awesome.quit,
+    awful.key({ modkey, "Control" }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
 
-    -- awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
-    --           {description = "increase master width factor", group = "layout"}),
-    -- awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)          end,
-    --           {description = "decrease master width factor", group = "layout"}),
-    awful.key({ modkey, "Shift"   }, "h",     function () awful.tag.incnmaster( 1, nil, true) end,
-              {description = "increase the number of master clients", group = "layout"}),
-    awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1, nil, true) end,
-              {description = "decrease the number of master clients", group = "layout"}),
-    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1, nil, true)    end,
-              {description = "increase the number of columns", group = "layout"}),
-    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1, nil, true)    end,
-              {description = "decrease the number of columns", group = "layout"}),
     awful.key({ modkey,           }, "space", function () awful.layout.inc( 1)                end,
               {description = "select next", group = "layout"}),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(-1)                end,
@@ -709,9 +552,6 @@ globalkeys = awful.util.table.join(
     -- Prompt
     awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
               {description = "run prompt", group = "launcher"}),
-
-    -- rofi Prompt
---    awful.key({ modkey            }, "e", function () awful.util.spawn("rofi -show run -disable-history") end),
 
     awful.key({ modkey }, "x",
               function ()
@@ -828,6 +668,7 @@ root.keys(globalkeys)
 
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
+--                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
 awful.rules.rules = {
     -- All clients will match this rule.
     { rule = { },
@@ -837,8 +678,8 @@ awful.rules.rules = {
                      raise = true,
                      keys = clientkeys,
                      buttons = clientbuttons,
-                     screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
+                     screen = awful.screen.preferred
+                     --placement = awful.placement.centered
      }
     },
 
@@ -915,11 +756,11 @@ client.connect_signal("request::titlebars", function(c)
     )
 
     awful.titlebar(c) : setup {
-        { -- Left
---	     function (c)
-    	--     c.minimized = true
---	     end ,
-        awful.titlebar.hide(c),
+        {  --Left
+            -- function (c)
+            -- c.minimized = true
+            -- end ,
+            awful.titlebar.hide(c),
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,
             layout  = wibox.layout.fixed.horizontal
