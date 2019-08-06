@@ -2,6 +2,9 @@
 local awful = require("awful")
 local wibox = require("wibox")
 
+-- Notification library
+local naughty = require("naughty")
+
 ----                                                                        ----
 hand_made_time_date_box = wibox.widget.textbox()
 hand_made_time_date_box.font = theme.fontTTF
