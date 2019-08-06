@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+LNCOMMAND="ln -vs"
+if [ "$(type -t lnsafe)" = "function" ]; then
+    LNCOMMAND="lnsafe"
+else
+    echo "local lnsafe impl used."
+fi
+
+CPCOMMAND="cp -v"
+if [ "$(type -t cpsafe)" = "function" ]; then
+    CPCOMMAND="cpsafe"
+fi
+
+MKDIRCOMMAND="mkdir -pv"
+
+LOCAL_ROOT=${PWD}
+AWESOME_HOME="${HOME}/.config/awesome"
+
+## DEBUG
+    LNCOMMAND="echo make link: ";MKDIRCOMMAND="echo create directory: "
+
+##[                                                                          ]##
+${MKDIRCOMMAND} "${AWESOME_HOME}"
+${LNCOMMAND} "${LOCAL_ROOT}/cmus.lua" "${AWESOME_HOME}/cmus.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/hand_made_time_date.lua" "${AWESOME_HOME}/hand_made_time_date.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/loker_status.lua" "${AWESOME_HOME}/loker_status.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/net_status.lua" "${AWESOME_HOME}/net_status.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/rc.lua" "${AWESOME_HOME}/rc.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/updates_arch.lua" "${AWESOME_HOME}/updates_arch.lua"
+${LNCOMMAND} "${LOCAL_ROOT}/utils.lua" "${AWESOME_HOME}/utils.lua"
+
