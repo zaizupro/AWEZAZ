@@ -8,6 +8,11 @@ updates_arch_box = wibox.widget.textbox()
 updates_arch_box.font = theme.fontTTF
 
 ----                                                                        ----
+function updates_arch_show_list()
+    awful.spawn.easy_async_with_shell("export KEKVAR=$(checkupdates | cut -d ' ' -f 1) && urxvt -e sh -c 'echo -e \"$KEKVAR\n\n\" | less '", function(stdout, stderr, reason, exit_code)
+    end)
+end
+----                                                                        ----
 function updates_arch()
     awful.spawn.easy_async("updates_arch.sh", function(stdout, stderr, reason, exit_code)
         updates_arch_box:set_text(stdout)
@@ -23,7 +28,7 @@ end
 ----                                                                        ----
 updates_arch_buttons = awful.util.table.join(
     awful.button({ }, 1, function() updates_arch() end),
-    awful.button({ }, 3, function() updates_arch() end)
+    awful.button({ }, 3, function() updates_arch_show_list() end)
     )
 
 updates_arch_box:buttons(updates_arch_buttons)

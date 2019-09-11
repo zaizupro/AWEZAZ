@@ -10,6 +10,11 @@ opening_brace = '['
 closing_brace = ']'
 
 ----                                                                        ----
+function trim1(s)
+   return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+----                                                                        ----
 function embrace(str)
     return ""..opening_brace..str..closing_brace..''
 end
