@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+CMND="$1"
+[ -z "$1" ] && CMND="def"
+
+## restart awesome (reread config)
+[ ${CMND} == "restart" ] && awesome-client 'awesome.restart()'
+
+## minimize focused window
+[ ${CMND} == "minimize" ] && awesome-client 'require("awful").key.execute ({"Mod4"}, "n")'
