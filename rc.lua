@@ -25,10 +25,13 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 
 --local volumearc = require("volumearc")
 require("utils")
+require("rc_local")
 require("cmus")
 require("updates_arch")
 require("loker_status")
 require("hand_made_time_date")
+require("hand_made_cpu")
+require("hand_made_memory")
 require("net_status")
 
 -- Autorun
@@ -128,12 +131,6 @@ power_menu = {
   {" POWEROFF", "urxvt", beautiful.poweroff_icon}
 }
 
--- menu template
-tmp_menu = {
-  {" Word", "urxvt"},
-  {" Exel", "urxvt"}
-}
-
 -- Create a launcher widget and a main menu
 myawesomemenu = {
     { "hotkeys", function() return false, hotkeys_popup.show_help end},
@@ -152,9 +149,6 @@ mymainmenu = awful.menu({ items = { { "AWSUM", myawesomemenu, beautiful.awesome_
 
                                   }
                         })
-
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -224,12 +218,15 @@ end
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
+
+--{{{{
+--                                                                            --
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ " [1] ", " [2] ", " [3] ", " [4] ", " [5] ", " [6] ", " [7] ", " [8] ", " [9] " }, s, awful.layout.layouts[1])
+    awful.tag({ "[1]", "[2]", "[3]", "[4]", "[5]", "[6]", "[7]", "[8]", "[9] " }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -246,116 +243,53 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytaglist.taglist_squares_resize   = true
 
     -- Create a tasklist widget
-    s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
+    s.mytasklist = awful.widget.tasklist
+    {
+        screen  = s,
+        filter  = awful.widget.tasklist.filter.currenttags,
+        buttons = tasklist_buttons,
 
---------------------------------------------------------------------------------
--- TODO reimpl in bash
-membox = wibox.widget.textbox()
-membox.font = theme.fontTTF
-function memory()
-   local io_meminfo      = io.open("/proc/meminfo")
-   local str_meminfo     = io_meminfo:read("*a")
-   io.close(io_meminfo)
+        style   =
+            {
+                shape_border_width = 1,
+                shape_border_color = '#824C00',
+                shape  = gears.shape.octogon,
+            },
+        layout   =
+            {
+                spacing = 5,
+                widget = wibox.container.place,
+                layout = wibox.layout.flex.horizontal
+            },
 
-   local total           = str_meminfo:match("MemTotal:%s+(%d+)")
-   local free            = str_meminfo:match("MemFree:%s+(%d+)")
-   local buffers         = str_meminfo:match("Buffers:%s+(%d+)")
-   local cached          = str_meminfo:match("Cached:%s+(%d+)")
-   local swap_total      = str_meminfo:match("SwapTotal:%s+(%d+)")
-   local swap_free       = str_meminfo:match("SwapFree:%s+(%d+)")
-   local swap_cached     = str_meminfo:match("SwapCached:%s+(%d+)")
+        widget_template =
+            {
+                {
+                    {
+                        {
+                            {
+                                id     = 'icon_role',
+                                widget = wibox.widget.imagebox,
+                            },
+                            margins = 2,
+                            widget  = wibox.container.margin,
+                        },
+                        {
+                            id     = 'text_role',
+                            widget = wibox.widget.textbox,
+                        },
+                        layout = wibox.layout.fixed.horizontal,
+                    },
+                    left  = 18,
+                    right = 18,
+                    widget = wibox.container.margin
+                },
+                id     = 'background_role',
+                forced_width    = 200,
+                widget = wibox.container.background,
+            },
+    }
 
-   local total_free      = free + buffers + cached
-   local total_swap_free = swap_free + swap_cached
-
-   local p_mem           = 100*(total - total_free)/total
-   local mem_color       = get_colorload(p_mem)
-   local sw_mem          = 100*(swap_total - total_swap_free)/swap_total
-   local sw_mem_color    = get_colorload(sw_mem)
-
-   local p_mem           = 100*(total - total_free)/total
-   local mem_color       = get_colorload(p_mem)
-   local sw_mem          = 100*(swap_total - total_swap_free)/swap_total
-   local sw_mem_color    = get_colorload(sw_mem)
-
-   membox:set_markup(embrace(
-                             colorify('RAM: ', theme.fg_normal)
-                             ..colorify(string.format('%.f%%', p_mem), mem_color)
-                            )
-                     )
-end
-
---------------------------------------------------------------------------------
-memory()
-one_sec_timer:connect_signal("timeout", memory)
-
---------------------------------------------------------------------------------
-cpugraph = awful.widget.graph()
-cpugraph:set_width(75)
-cpugraph:set_height(25)
-cpugraph:set_background_color("#494B4F")
---cpugraph:set_color("#FF5656")
-cpugraph:set_color({ type = "horisontal", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#FF5656" }, { 0.5, "#88A175" }, { 1, "#AECF96" } }})
--- Register CPU widget
--- vicious.register(cpugraph, vicious.widgets.cpu,
---                     function (widget, args)
---                         return args[1]
---                     end)
-cpubox = wibox.widget.textbox()
-cpubox.font = theme.fontTTF
-
-cpubox_img = wibox.widget.imagebox()
-cpu_arr = {}
-cpu0_arr = {}
-cpu1_arr = {}
-for i = 0, 4 do
-   cpu_arr[i] = 0
-   cpu0_arr[i] = 0
-   cpu1_arr[i] = 0
-end
-
---------------------------------------------------------------------------------
-function parse_cpu(cpu, stat)
-   local cpu_new = {}
-   local ret = {}
-   cpu_new[0], cpu_new[1], cpu_new[2], cpu_new[3], cpu_new[4] = stat:match("cpu%d*%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)")
-
-   local idle   = (cpu_new[3] - cpu[3]) + (cpu_new[4] - cpu[4])
-   local user   = (cpu_new[1] - cpu[1]) + (cpu_new[0] - cpu[0])
-   local system = (cpu_new[2] - cpu[2])
-   local total  = idle + user + system
-   local busy   = user + system
-
-   ret['busy'] = busy*100/total
-   ret['sys'] = system*100/total
-   ret['user'] = user*100/total
-   ret['cpu'] = cpu_new
-
-   return ret
-end
-
---------------------------------------------------------------------------------
-function cpu()
-   local io_stat  = io.open("/proc/stat")
-   local str_stat = io_stat:read("*l")
-   io.close(io_stat)
-
-   local ret = parse_cpu(cpu_arr, str_stat)
-   cpu_arr = ret['cpu']
-
-   cpubox:set_markup (embrace(colorify('CPU: ', theme.fg_normal)
-                       ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))
-                       -- ..') | (u:'
-                       -- ..colorify(string.format('%.f%%', ret['user']), get_colorload(ret['user']))
-                       -- ..', s:'
-                       -- ..colorify(string.format('%.f%%', ret['sys']), get_colorload(ret['sys']))
-                       -- ..')'
-                             )
-                     )
-end
-
-cpu()
-one_sec_timer:connect_signal("timeout", cpu)
 
 --------------------------------------------------------------------------------
 hddbox = wibox.widget.textbox()
@@ -393,54 +327,73 @@ end
 -- hdd()
 -- one_sec_timer:connect_signal("timeout", hdd)
 
---------------------------------------------------------------------------------
-bottom_wibox = {}
-for scr = 1, screen.count() do
-    local l_layout = wibox.layout.fixed.horizontal()
---    l_layout:add(membox)
-    -- l_layout.width(10)
-    l_layout:add(s.mytasklist)
-    bottom_wibox[scr] = awful.wibox({ position = "bottom" --, height = "25"
-         , screen = scr })
+--                                                                            --
+    bottom_wibox = {}
+    layouts = {}
+    scr = s.index
 
-    local lay = wibox.layout.align.horizontal()
-    lay:set_left(l_layout)
-    bottom_wibox[scr]:set_widget(lay)
-end
+    bottom_wibox[scr] = awful.wibar({ position = "bottom" , screen = scr })
+    layouts[scr] = wibox.layout.align.horizontal()
+    layouts[scr]:set_left(s.mytasklist)
+    bottom_wibox[scr]:set_widget(layouts[scr])
 
---------------------------------------------------------------------------------
+--                                                                            --
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s })
+    main_mon = local_main_mon
 
     -- Add widgets to the wibox
-    s.mywibox:setup {
-        layout = wibox.layout.align.horizontal(),
-        { -- Left widgets
-            layout = wibox.layout.fixed.horizontal,
-            -- mylauncher,
-            s.mytaglist,
-            s.mypromptbox,
-        },
-        { -- Middle widgets
-            layout = wibox.layout.fixed.horizontal,
-       -- s.mytasklist
-        },
-        { -- Right widgets
-            layout = wibox.layout.fixed.horizontal,
-            wibox.widget.systray(),
-            membox,
-            cpubox,
-            tb_cmus,
-            --hddbox,
-            net_status,
-            updates_arch_box,
-            loker_status_box,
-            mykeyboardlayout,
-            --volumearc,
-            hand_made_time_date_box,
-            s.mylayoutbox,
+    if s.index == main_mon then
+
+        s.mywibox:setup
+        {
+            layout = wibox.layout.align.horizontal(),
+            { -- Left widgets
+                layout = wibox.layout.fixed.horizontal,
+                s.mytaglist,
+                s.mypromptbox,
+            },
+            { -- Middle widgets
+                layout = wibox.layout.fixed.horizontal,
+            },
+            { -- Right widgets
+                layout = wibox.layout.fixed.horizontal,
+                hand_made_memory_box,
+                hand_made_cpu_box,
+                tb_cmus,
+                --hddbox,
+                net_status,
+                updates_arch_box,
+                loker_status_box,
+                mykeyboardlayout,
+                --volumearc,
+                hand_made_time_date_box,
+                s.mylayoutbox,
+            }
         }
-    }
+    else
+        s.mywibox:setup
+        {
+            layout = wibox.layout.align.horizontal(),
+            {
+                layout = wibox.layout.fixed.horizontal,
+                s.mytaglist,
+            },
+            {
+                layout = wibox.layout.fixed.horizontal,
+            },
+            {
+                layout = wibox.layout.fixed.horizontal,
+                wibox.widget.systray(),
+                hand_made_memory_box,
+                hand_made_cpu_box,
+                hand_made_time_date_box,
+                s.mylayoutbox,
+            }
+        }
+    end
+
+
 end)
 -- }}}
 
@@ -521,8 +474,6 @@ globalkeys = awful.util.table.join(
         {description = "go back", group = "client"}),
 
     -- Standard program
-    awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
-              {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
     awful.key({ modkey, "Control" }, "q", awesome.quit,
@@ -691,7 +642,7 @@ awful.rules.rules = {
         },
         class = {
           "*",
-          "URxvt",
+          --"URxvt",
           "Arandr",
           "Gpick",
           "Kruler",
@@ -785,6 +736,8 @@ client.connect_signal("request::titlebars", function(c)
         layout = wibox.layout.align.horizontal
     }
 end)
+-- }}}
+
 
 -- Enable sloppy focus, so that focus follows mouse.
 --client.connect_signal("mouse::enter", function(c)
