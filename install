@@ -1,32 +1,45 @@
 #!/usr/bin/env bash
 
-LNCOMMAND="ln -vs"
-if [ "$(type -t lnsafe)" = "function" ]; then
-    LNCOMMAND="lnsafe"
-else
-    echo "local lnsafe impl used."
-fi
-
-CPCOMMAND="cp -v"
-if [ "$(type -t cpsafe)" = "function" ]; then
-    CPCOMMAND="cpsafe"
-fi
-
-MKDIRCOMMAND="mkdir -pv"
-
-LOCAL_ROOT=${PWD}
+LOCAL_ROOT=$(cd $(dirname $0); echo $PWD)
 AWESOME_HOME="${HOME}/.config/awesome"
 
+##[                                                                          ]##
 ## DEBUG
-    LNCOMMAND="echo make link: ";MKDIRCOMMAND="echo create directory: "
+DRY_RUN=true
+if [ ${DRY_RUN} = true ]; then
+    CPCOMMAND="echo make copy: "
+    LNCOMMAND="echo make link: "
+    MKDIRCOMMAND="echo create directory: "
+    echo "$(tput setaf 208)WARN: $(tput setaf 118)dry run.$(tput sgr 0)"
+else
+    LNCOMMAND="ln -vs"
+    if [ "$(type -t lnsafe)" = "function" ]; then
+        LNCOMMAND="lnsafe"
+    else
+        echo "local lnsafe impl used."
+    fi
+
+    CPCOMMAND="cp -v"
+    if [ "$(type -t cpsafe)" = "function" ]; then
+        CPCOMMAND="cpsafe"
+    fi
+
+    MKDIRCOMMAND="mkdir -pv"
+fi
 
 ##[                                                                          ]##
-${MKDIRCOMMAND} "${AWESOME_HOME}"
-${LNCOMMAND} "${LOCAL_ROOT}/cmus.lua" "${AWESOME_HOME}/cmus.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/hand_made_time_date.lua" "${AWESOME_HOME}/hand_made_time_date.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/loker_status.lua" "${AWESOME_HOME}/loker_status.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/net_status.lua" "${AWESOME_HOME}/net_status.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/rc.lua" "${AWESOME_HOME}/rc.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/updates_arch.lua" "${AWESOME_HOME}/updates_arch.lua"
-${LNCOMMAND} "${LOCAL_ROOT}/utils.lua" "${AWESOME_HOME}/utils.lua"
+OUT_LOG="${OUT_LOG}\n"$(${MKDIRCOMMAND} "${AWESOME_HOME}")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/cmus.lua" "${AWESOME_HOME}/cmus.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_cpu.lua" "${AWESOME_HOME}/hand_made_cpu.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_memory.lua" "${AWESOME_HOME}/hand_made_memory.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_time_date.lua" "${AWESOME_HOME}/hand_made_time_date.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/loker_status.lua" "${AWESOME_HOME}/loker_status.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/net_status.lua" "${AWESOME_HOME}/net_status.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/rc.lua" "${AWESOME_HOME}/rc.lua")
+OUT_LOG="${OUT_LOG}\n"$(${CPCOMMAND} "${LOCAL_ROOT}/rc_local.lua" "${AWESOME_HOME}/rc_local.lua")
+[ ${DRY_RUN} = false ] && echo -e "$(tput setaf 208)WARN: $(tput setaf 202)'fill ur rc_local.lua'$(tput sgr 0)" >&2
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/updates_arch.lua" "${AWESOME_HOME}/updates_arch.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/utils.lua" "${AWESOME_HOME}/utils.lua")
 
+
+echo -e "${OUT_LOG}" |  column -t -s' '
