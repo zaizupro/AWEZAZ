@@ -3,14 +3,28 @@
 LOCAL_ROOT=$(cd $(dirname $0); echo $PWD)
 AWESOME_HOME="${HOME}/.config/awesome"
 
-##[                                                                          ]##
+##                                                                                                ##
+
+_NC="$(tput sgr 0)"
+_ORANGEFG=$(tput setaf 208)
+_ORANGEFGD=$(tput setaf 202)
+_YELLOWFG=$(tput setaf 226)
+_GREENFG=$(tput setaf 118)
+
+##                                                                                                ##
+_WARNDAT()
+{
+    echo "${_ORANGEFG}WARN:${_NC} ${_YELLOWFG}$@${_NC}"
+}
+
+##                                                                                                ##
 ## DEBUG
 DRY_RUN=true
 if [ ${DRY_RUN} = true ]; then
     CPCOMMAND="echo make copy: "
     LNCOMMAND="echo make link: "
     MKDIRCOMMAND="echo create directory: "
-    echo "$(tput setaf 208)WARN: $(tput setaf 118)dry run.$(tput sgr 0)"
+    _WARNDAT "${_GREENFG}dry run."
 else
     LNCOMMAND="ln -vs"
     if [ "$(type -t lnsafe)" = "function" ]; then
@@ -27,7 +41,7 @@ else
     MKDIRCOMMAND="mkdir -pv"
 fi
 
-##[                                                                          ]##
+##                                                                                                ##
 OUT_LOG="${OUT_LOG}\n"$(${MKDIRCOMMAND} "${AWESOME_HOME}")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/cmus.lua" "${AWESOME_HOME}/cmus.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_cpu.lua" "${AWESOME_HOME}/hand_made_cpu.lua")

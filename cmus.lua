@@ -112,10 +112,8 @@ function cmusover_addToWidget(widget)
 end
 
 ----                                                                        ----
--- Cmus Widget
-tb_cmus_widget = wibox.widget{}
 tb_cmus = wibox.widget.textbox()
--- tb_cmus.font = theme.fontTTF
+tb_cmus.font = theme.fontTTF
 tb_cmus:set_text("[ cmus ]")
 
 ----                                                                        ----

@@ -9,7 +9,11 @@ updates_arch_box.font = theme.fontTTF
 
 ----                                                                        ----
 function updates_arch_show_list()
-    awful.spawn.easy_async_with_shell("export UPDATES=$(checkupdates | cut -d ' ' -f 1) && urxvt -geometry 30x20 -e sh -c 'echo -e \"$UPDATES\n\n\" | less -SR '",
+    command = "export UPDATES=$(checkupdates | cut -d ' ' -f 1) "
+        .. " && urxvt -geometry 30x20 -e sh -c "
+        .. " 'echo -e \"$UPDATES\n\n\" | less -SR '"
+
+    awful.spawn.easy_async_with_shell(command,
         function(stdout, stderr, reason, exit_code)
         end)
 end

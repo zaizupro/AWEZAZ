@@ -326,6 +326,7 @@ end
 --------------------------------------------------------------------------------
 -- hdd()
 -- one_sec_timer:connect_signal("timeout", hdd)
+    main_mon = local_main_mon
 
 --                                                                            --
     bottom_wibox = {}
@@ -335,12 +336,32 @@ end
     bottom_wibox[scr] = awful.wibar({ position = "bottom" , screen = scr })
     layouts[scr] = wibox.layout.align.horizontal()
     layouts[scr]:set_left(s.mytasklist)
-    bottom_wibox[scr]:set_widget(layouts[scr])
+    if s.index == main_mon then
+        local tray = wibox.widget.systray()
+        tray:set_screen(s)
+        bottom_wibox[scr]:setup
+        {
+            layout = wibox.layout.align.horizontal(),
+            { -- Left widgets
+                layout = wibox.layout.fixed.horizontal,
+                layouts[scr],
+            },
+            { -- Middle widgets
+                layout = wibox.layout.fixed.horizontal,
+            },
+            { -- Right widgets
+                layout = wibox.layout.fixed.horizontal,
+                tray,
+                hand_made_time_date_box
+            }
+        }
+    else
+        bottom_wibox[scr]:set_widget(layouts[scr])
+    end
 
 --                                                                            --
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s })
-    main_mon = local_main_mon
 
     -- Add widgets to the wibox
     if s.index == main_mon then
@@ -350,6 +371,7 @@ end
             layout = wibox.layout.align.horizontal(),
             { -- Left widgets
                 layout = wibox.layout.fixed.horizontal,
+                s.mylayoutbox,
                 s.mytaglist,
                 s.mypromptbox,
             },
@@ -358,6 +380,7 @@ end
             },
             { -- Right widgets
                 layout = wibox.layout.fixed.horizontal,
+                -- wibox.widget.systray(),
                 hand_made_memory_box,
                 hand_made_cpu_box,
                 tb_cmus,
@@ -368,7 +391,6 @@ end
                 mykeyboardlayout,
                 --volumearc,
                 hand_made_time_date_box,
-                s.mylayoutbox,
             }
         }
     else
@@ -377,6 +399,7 @@ end
             layout = wibox.layout.align.horizontal(),
             {
                 layout = wibox.layout.fixed.horizontal,
+                s.mylayoutbox,
                 s.mytaglist,
             },
             {
@@ -384,11 +407,10 @@ end
             },
             {
                 layout = wibox.layout.fixed.horizontal,
-                wibox.widget.systray(),
+                --wibox.widget.systray(),
                 hand_made_memory_box,
                 hand_made_cpu_box,
                 hand_made_time_date_box,
-                s.mylayoutbox,
             }
         }
     end
