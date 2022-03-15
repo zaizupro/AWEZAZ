@@ -7,17 +7,22 @@
 -------------------------------------------------
 
 local awful = require("awful")
+local gears = require("gears")
 local watch = require("awful.widget.watch")
 local wibox = require("wibox")
 local naughty = require("naughty")
 
 ----                                                                        ----
-local paused_indicator='॥ '
+--local paused_indicator='॥ '
 -- local paused_indicator='|'
 -- local paused_indicator='⣿'
+ local paused_indicator='⏸'
+-- local paused_indicator='Ⅱ'
 -- local paused_indicator='⏸'
 
-local play_indicator='>'
+--local play_indicator='>'
+local play_indicator='▶'
+--local play_indicator='►'
 -- local play_indicator=''
 -- local play_indicator='⏵' -- ⏴
 
@@ -40,7 +45,8 @@ function cmus_hook()
                 cmus_string = play_indicator
             end
         else
-            cmus_string = '◾'
+--            cmus_string = '◾'
+            cmus_string = '◼'
         end
         return cmus_string
     else
@@ -88,10 +94,10 @@ function cmus_control (action)
     end
 end
 
-----                                                                        ----
+----                       HOVER                                            ----
 function cmus_popup(timeout)
     local cmus_info
-    local out = assert(io.popen("cmus_info", 'r'))
+    local out = assert(io.popen(". ~/.bashrc; cmus_info", 'r'))
     cmus_info = out:read("*all")
     out:close()
 
@@ -105,10 +111,8 @@ end
 
 ----                                                                        ----
 function cmusover_addToWidget(widget)
-    widget:connect_signal(
-        'mouse::enter', function () cmus_popup(0) end)
-    widget:connect_signal(
-        'mouse::leave', function () naughty.destroy(popup) end)
+    widget:connect_signal('mouse::enter', function () cmus_popup(0) end)
+    widget:connect_signal('mouse::leave', function () naughty.destroy(popup) end)
 end
 
 ----                                                                        ----
@@ -118,7 +122,7 @@ tb_cmus:set_text("[ cmus ]")
 
 ----                                                                        ----
 -- refresh Cmus widget
-cmus_timer = timer({timeout = 1})
+cmus_timer = gears.timer{timeout = 1}
 cmus_timer:connect_signal(
     "timeout",
     function()
@@ -127,14 +131,14 @@ cmus_timer:connect_signal(
 cmus_timer:start()
 
 ----                                                                        ----
--- pause on click
+--
 cmusbuttons = awful.util.table.join(
     awful.button({ }, 1, function() cmus_control("play_pause") end),
     awful.button({ }, 3,
         function()
-            run_or_raise(termapps .. " -name cmus -e cmus",
-                             { instance = "cmus" })
-    end)
+            command = "urxvt -name cmus -title cmus -e bash -i -c 'tma cmus' &"
+            awful.spawn.easy_async_with_shell(command,{})
+        end)
 )
 tb_cmus:buttons(cmusbuttons)
 cmusover_addToWidget(tb_cmus)

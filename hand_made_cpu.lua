@@ -47,8 +47,8 @@ function hm_cpu()
 
     local ret = parse_cpu(cpu_arr, str_stat)
     cpu_arr = ret['cpu']
-    hand_made_cpu_box:set_markup (embrace(colorify('CPU: ', theme.fg_normal)
-                        ..colorify(string.format('%.f%%', ret['busy']), get_colorload(ret['busy']))))
+    local cpu_cur_value = ret['busy']
+    hand_made_cpu_box:set_markup(make_percent_box('CPU',cpu_cur_value))
 end
 
 ----                                                                        ----
@@ -60,6 +60,30 @@ function hand_made_cpu()
                            end
     )
 end
+
+
+----                       HOVER                                            ----
+function hmc_popup(timeout)
+    local info
+    local command = "for i in $(seq 2 21); do  ps ax -o pid,pcpu,ucmd --sort=-pcpu | sed -n \"$i,$i p\"  | awk '{printf \"%s: %s%%\" , $3, $2  }' ;echo ; done | column -t"
+    local out = assert(io.popen(command, 'r'))
+    info = out:read("*all")
+    out:close()
+
+    hmc_popup_ = naughty.notify({
+        text = info,
+        timeout = timeout,
+        hover_timeout = 0.5,
+        screen = awful.screen.focused()
+        })
+end
+
+function hmc_hover_addToWidget(widget)
+    widget:connect_signal('mouse::enter', function () hmc_popup(0) end)
+    widget:connect_signal('mouse::leave', function () naughty.destroy(hmc_popup_) end)
+end
+
+hmc_hover_addToWidget(hand_made_cpu_box)
 
 ----                                                                        ----
 hand_made_cpu()

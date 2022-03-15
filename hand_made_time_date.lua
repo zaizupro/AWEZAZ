@@ -39,13 +39,17 @@ function hand_made_time_date()
 end
 
 ----                                                                        ----
+get_year=[[notify-send "$(cal -m $(date +%Y))"]]
+get_year_=[[notify-send -t 0 "$(cal -m $(date +%Y))"]]
 cmnd=[[notify-send "$(cal -m)"]]
 cmnd2=[[notify-send "$(cal -m -3)"]]
 cmnd_=[[notify-send -t 0 "$(cal -m)"]]
 cmnd2_=[[notify-send -t 0 "$(cal -m -3)"]]
 hand_made_time_date_buttons = awful.util.table.join(
-    awful.button({ }, 1, function () awful.spawn.easy_async_with_shell(cmnd) end),
+    awful.button({           }, 1, function () awful.spawn.easy_async_with_shell(cmnd) end),
     awful.button({ "Control" }, 1, function () awful.spawn.easy_async_with_shell(cmnd_) end),
+    awful.button({ 'Shift'   }, 1, function () awful.spawn.easy_async_with_shell(get_year) end),
+    awful.button({ "Control", 'Shift' }, 1, function () awful.spawn.easy_async_with_shell(get_year_) end),
     awful.button({ }, 3, function () awful.spawn.easy_async_with_shell(cmnd2) end),
     awful.button({ "Control" }, 3, function () awful.spawn.easy_async_with_shell(cmnd2_) end)
     )

@@ -7,13 +7,12 @@ local naughty = require("naughty") -- DEBUG
 loker_status_box = wibox.widget.textbox()
 loker_status_box.font = theme.fontTTF
 
-chek_lok_CMD="chek_autolok"
+chek_lok_CMD=". ~/.bashrc; chek_autolok"
 
 ----                                                                        ----
 function loker_status()
 
     awful.spawn.easy_async_with_shell(chek_lok_CMD, function(stdout, stderr, reason, exit_code)
---        naughty.notify { text = trim1(stdout) } -- DEBUG
         status = trim1(stdout)
 
         if status ~= "1" and status ~= "0" then

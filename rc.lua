@@ -29,9 +29,9 @@ require("rc_local")
 require("cmus")
 require("updates_arch")
 require("loker_status")
-require("hand_made_time_date")
 require("hand_made_cpu")
 require("hand_made_memory")
+require("hand_made_time_date")
 require("net_status")
 
 -- Autorun
@@ -326,7 +326,7 @@ end
 --------------------------------------------------------------------------------
 -- hdd()
 -- one_sec_timer:connect_signal("timeout", hdd)
-    main_mon = local_main_mon
+    main_mon = local_main_mon -- in rc_local
 
 --                                                                            --
     bottom_wibox = {}
@@ -385,7 +385,7 @@ end
                 hand_made_cpu_box,
                 tb_cmus,
                 --hddbox,
-                net_status,
+                net_status_box,
                 updates_arch_box,
                 loker_status_box,
                 mykeyboardlayout,
@@ -520,7 +520,8 @@ globalkeys = awful.util.table.join(
               end,
               {description = "restore minimized", group = "client"}),
 
-    awful.key({ modkey, "Shift" }, "y", awful.placement.centered),
+    awful.key({ modkey, "Shift" }, "y", awful.placement.centered,
+              {description = "centering window", group = "client"}),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
@@ -572,7 +573,7 @@ clientkeys = awful.util.table.join(
             c.minimized = true
         end ,
         {description = "minimize", group = "client"}),
-    awful.key({ modkey,           }, "m",
+    awful.key({ modkey, "Control" }, "f",
         function (c)
             c.maximized = not c.maximized
             c:raise()
