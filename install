@@ -17,32 +17,35 @@ _WARNDAT()
     echo "${_ORANGEFG}WARN:${_NC} ${_YELLOWFG}$@${_NC}"
 }
 
+_main_()
+{
 ##                                                                                                ##
 ## DEBUG
 DRY_RUN=true
-if [ ${DRY_RUN} = true ]; then
-    CPCOMMAND="echo make copy: "
-    LNCOMMAND="echo make link: "
-    MKDIRCOMMAND="echo create directory: "
+if [ "${DRY_RUN}" = true ]; then
+    local CPCOMMAND="echo make copy: "
+    local LNCOMMAND="echo make link: "
+    local MKDIRCOMMAND="echo create directory: "
     _WARNDAT "${_GREENFG}dry run."
 else
-    LNCOMMAND="ln -vs"
+    local LNCOMMAND="ln -vs"
     if [ "$(type -t lnsafe)" = "function" ]; then
-        LNCOMMAND="lnsafe"
+        local LNCOMMAND="lnsafe"
     else
-        echo "local lnsafe impl used."
+        echo "${_ORANGEFG}local lnsafe impl used.${_NC}"
     fi
 
-    CPCOMMAND="cp -v"
+    local CPCOMMAND="cp -v"
     if [ "$(type -t cpsafe)" = "function" ]; then
-        CPCOMMAND="cpsafe"
+        local CPCOMMAND="cpsafe"
     fi
 
-    MKDIRCOMMAND="mkdir -pv"
+    local MKDIRCOMMAND="mkdir -pv"
 fi
 
 ##                                                                                                ##
-OUT_LOG="${OUT_LOG}\n"$(${MKDIRCOMMAND} "${AWESOME_HOME}")
+local OUT_LOG=
+OUT_LOG="${OUT_LOG}\n"$(${MKDIRCOMMAND} "${AWESOME_HOME}" 2>&1)
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/cmus.lua" "${AWESOME_HOME}/cmus.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_cpu.lua" "${AWESOME_HOME}/hand_made_cpu.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/hand_made_memory.lua" "${AWESOME_HOME}/hand_made_memory.lua")
@@ -51,9 +54,13 @@ OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/loker_status.lua" "${AWESOME
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/net_status.lua" "${AWESOME_HOME}/net_status.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/rc.lua" "${AWESOME_HOME}/rc.lua")
 OUT_LOG="${OUT_LOG}\n"$(${CPCOMMAND} "${LOCAL_ROOT}/rc_local.lua" "${AWESOME_HOME}/rc_local.lua")
-[ ${DRY_RUN} = false ] && echo -e "$(tput setaf 208)WARN: $(tput setaf 202)'fill ur rc_local.lua'$(tput sgr 0)" >&2
+[ "${DRY_RUN}" = false ] && echo -e "${_ORANGEFG}WARN: ${_ORANGEFGD}'fill ur rc_local.lua'${_NC}" >&2
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/updates_arch.lua" "${AWESOME_HOME}/updates_arch.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/utils.lua" "${AWESOME_HOME}/utils.lua")
 
 
-echo -e "${OUT_LOG}" |  column -t -s' '
+echo -e "${OUT_LOG}" |  column -t -s ' '
+
+}
+
+_main_
