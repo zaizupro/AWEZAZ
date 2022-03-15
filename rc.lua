@@ -525,6 +525,24 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Shift" }, "y", awful.placement.centered,
               {description = "centering window", group = "client"}),
 
+    -- Simulate Windows 7 'edge snap' (also called aero snap) feature
+    awful.key({ modkey }, "Left",
+        function ()
+            awful.placement.left(client.focus)
+            awful.placement.scale(client.focus,{to_percent = 0.5})
+            awful.placement.maximize_vertically(client.focus,{honor_workarea=true})
+        end,
+        {description = "snap left", group = "client"}),
+
+    -- Simulate Windows 7 'edge snap' (also called aero snap) feature
+    awful.key({ modkey }, "Right",
+        function ()
+            local f = (awful.placement.right + awful.placement.scale + awful.placement.maximize_vertically)
+            f(client.focus, {honor_workarea=true, to_percent = 0.5})
+        end,
+        {description = "snap right", group = "client"}),
+
+
     -- Prompt
     awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
               {description = "run prompt", group = "launcher"}),
