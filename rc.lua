@@ -31,6 +31,7 @@ require("updates_arch")
 require("loker_status")
 require("hand_made_cpu")
 require("hand_made_memory")
+require("hand_made_storage")
 require("hand_made_time_date")
 require("net_status")
 
@@ -383,6 +384,7 @@ end
                 -- wibox.widget.systray(),
                 hand_made_memory_box,
                 hand_made_cpu_box,
+                hand_made_storage_box,
                 tb_cmus,
                 --hddbox,
                 net_status_box,
