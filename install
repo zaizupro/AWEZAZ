@@ -57,6 +57,7 @@ OUT_LOG="${OUT_LOG}\n"$(${CPCOMMAND} "${LOCAL_ROOT}/rc_local.lua" "${AWESOME_HOM
 [ "${DRY_RUN}" = false ] && echo -e "${_ORANGEFG}WARN: ${_ORANGEFGD}'fill ur rc_local.lua'${_NC}" >&2
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/updates_arch.lua" "${AWESOME_HOME}/updates_arch.lua")
 OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/utils.lua" "${AWESOME_HOME}/utils.lua")
+OUT_LOG="${OUT_LOG}\n"$(${LNCOMMAND} "${LOCAL_ROOT}/vm_status.lua" "${AWESOME_HOME}/vm_status.lua")
 
 
 echo -e "${OUT_LOG}" |  column -t -s ' '
