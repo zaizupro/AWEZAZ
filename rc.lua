@@ -28,6 +28,7 @@ require("utils")
 require("rc_local")
 require("cmus")
 require("updates_arch")
+require("vm_status")
 require("loker_status")
 require("hand_made_cpu")
 require("hand_made_memory")
@@ -393,6 +394,7 @@ end
                 mykeyboardlayout,
                 --volumearc,
                 hand_made_time_date_box,
+                vm_st_box
             }
         }
     else

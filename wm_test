@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+#awesome-client  'require("naughty").notify({text = ""..require("awful").tag.getscreen() })'
+#awesome-client  'require("naughty").notify({text = ""..s.index })'
