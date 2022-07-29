@@ -7,6 +7,11 @@
 
 local gears = require("gears")
 
+-- Notification library
+local naughty = require("naughty")
+local awful = require("awful")
+
+
 opening_brace = '['
 closing_brace = ']'
 
@@ -36,9 +41,9 @@ end
 function get_colorload(value)
    local current_val = tonumber(value)
    local color = theme.level_fg_good  -- '#ffaa00' -- normal
-   if current_val > 85 then
+   if (current_val > 85) then
       color = theme.level_fg_critical  -- '#ff1100' -- 'red'
-   elseif current_val > 60 then
+   elseif (current_val > 60) then
       color = theme.level_fg_normal  -- '#ff5500' -- 'yellow'
    end
    return color
@@ -47,6 +52,11 @@ end
 ----                                                                        ----
 function colorify(str, color)
    return '<span foreground="'..color..'">'..str..'</span>'
+end
+
+----                                                                        ----
+function embrace_clr(str, color)
+   return embrace(colorify(str, color))
 end
 
 ----                                                                        ----
@@ -62,9 +72,22 @@ function make_percent_box(txt, value)
 end
 
 ----                                                                        ----
+function notify_dat(txt)
+            if (txt ~= "") then
+                notify_dat_popup = naughty.notify({
+                text = txt,
+                timeout = timeout,
+                hover_timeout = 0.5,
+                screen = awful.screen.focused()
+                })
+            end
+end
+
+----                                                                        ----
 one_sec_timer = gears.timer{timeout = 1}
 five_sec_timer = gears.timer{timeout = 5}
 ten_sec_timer = gears.timer{timeout = 10}
+one_min_timer = gears.timer{timeout = 60}
 ten_min_timer = gears.timer{timeout = 600}
 
 ----                                                                        ----
@@ -72,6 +95,7 @@ ten_min_timer = gears.timer{timeout = 600}
 one_sec_timer:start()
 five_sec_timer:start()
 ten_sec_timer:start()
+one_min_timer:start()
 ten_min_timer:start()
 
 

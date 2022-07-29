@@ -8,7 +8,7 @@ local naughty = require("naughty")
 ----                                                                        ----
 hand_made_storage_box = wibox.widget.textbox()
 hand_made_storage_box.font = theme.fontTTF
-hand_made_storage_box:set_text(embrace('storage'))
+hand_made_storage_box:set_markup(embrace_clr("storage", "#ff0000"))
 
 ----                                                                        ----
 function hand_made_storage()
@@ -16,6 +16,7 @@ function hand_made_storage()
     awful.spawn.easy_async_with_shell(command,
         function(stdout, stderr, reason, exit_code)
             local cur_value = stdout
+            notify_dat(stderr)
             hand_made_storage_box:set_markup(make_percent_box('STORAGE',cur_value))
         end)
 end

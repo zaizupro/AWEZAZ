@@ -362,7 +362,7 @@ end
 
 --                                                                            --
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    s.mywibox = awful.wibar({ height = 25, position = "top", screen = s })
 
     -- Add widgets to the wibox
     if s.index == main_mon then

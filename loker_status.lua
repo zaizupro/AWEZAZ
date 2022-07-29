@@ -14,6 +14,7 @@ function loker_status()
 
     awful.spawn.easy_async_with_shell(chek_lok_CMD, function(stdout, stderr, reason, exit_code)
         status = trim1(stdout)
+        notify_dat(stderr)
 
         if status ~= "1" and status ~= "0" then
             loker_status_box:set_markup('['..colorify("x", "#ff0000")..']')
